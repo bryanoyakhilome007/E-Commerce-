@@ -1,0 +1,114 @@
+1. Find the total revenue from completed orders only.
+2. Show total spending per customer, ordered from highest to lowest.
+3. Rank customers by total spending.
+4. Find customers who placed more than 2 orders.
+5. Show average order value per city.
+6. Find the top 2 highest single orders.
+7. Count how many orders were cancelled.
+8. Show customers who have never cancelled an order.
+9. Find the daily revenue trend.
+10 .Which city generated the highest total revenue?
+
+
+SELECT 
+	work_customers.customer_id,
+	work_customers.customer_name,
+	work_customers.city,
+	work_orders.order_id,
+	work_orders.order_amount,
+	work_orders.order_date,
+	work_orders.status
+FROM work_customers
+INNER JOIN work_orders
+ON work_customers.customer_id = work_orders.customer_id;
+
+1. SELECT 
+SUM(order_amount)
+FROM work_customers
+INNER JOIN work_orders
+ON work_customers.customer_id = work_orders.customer_id
+WHERE status = 'completed';
+
+2. SELECT
+customer_name,
+SUM(order_amount) AS total_spent
+FROM work_customers
+INNER JOIN work_orders
+ON work_customers.customer_id = work_orders.customer_id
+GROUP BY customer_name
+ORDER BY SUM(order_amount) DESC;
+
+3. SELECT
+customer_name,
+SUM(order_amount) AS total_spent,
+ROW_NUMBER() OVER (ORDER BY SUM(order_amount) DESC) AS ranking
+FROM work_customers
+INNER JOIN work_orders
+ON work_customers.customer_id = work_orders.customer_id
+GROUP BY customer_name;
+
+4. SELECT 
+customer_name,
+COUNT(order_id)
+FROM work_customers
+INNER JOIN work_orders
+ON work_customers.customer_id = work_orders.customer_id
+GROUP BY customer_name
+HAVING COUNT(order_id) > 2;
+
+5. SELECT 
+city,
+AVG(order_amount) AS average_spend
+FROM work_customers
+INNER JOIN work_orders
+ON work_customers.customer_id = work_orders.customer_id
+GROUP BY city
+ORDER BY AVG(order_amount) DESC;
+
+6. SELECT
+customer_name,
+order_amount
+FROM work_customers
+INNER JOIN work_orders
+ON work_customers.customer_id = work_orders.customer_id
+ORDER BY order_amount DESC
+LIMIT 2;
+
+7. SELECT
+COUNT(order_id)
+FROM work_customers
+INNER JOIN work_orders
+ON work_customers.customer_id = work_orders.customer_id
+WHERE status = 'cancelled';
+
+8. SELECT
+order_date,
+SUM(order_amount) AS daily_revenue
+FROM work_customers
+INNER JOIN work_orders
+ON work_customers.customer_id = work_orders.customer_id
+WHERE status = 'completed'
+GROUP BY order_date
+ORDER BY order_date;
+
+9. SELECT 
+city,
+SUM(order_amount) AS total_revenue
+FROM work_customers
+INNER JOIN work_orders
+ON work_customers.customer_id = work_orders.customer_id
+WHERE status = 'completed'
+GROUP BY city
+ORDER BY SUM(order_amount) DESC
+LIMIT 1;
+
+10. SELECT
+city,
+SUM(order_amount) AS total_revenue
+FROM work_customers
+INNER JOIN work_orders
+ON work_customers.customer_id = work_orders.customer_id
+WHERE status = 'completed'
+GROUP BY city
+ORDER BY SUM(order_amount) DESC
+LIMIT 1;
